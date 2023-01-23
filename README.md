@@ -1,1 +1,1 @@
-# gtc-sybricks
+# Sybricks
