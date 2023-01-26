@@ -21,6 +21,14 @@ class EtherscanLego(BaseLego):
         self.MAX_ATTEMPT = 0
         self.PREFIX = 'api'
 
+    def get_transactions_counterparts(self, transactions: list):
+        """Given a list of transactions, returns the all the "from" and "to" addresses
+        """
+        from_addr = Counter([r['from'] for r in transactions if r['from']!=address])
+        to_addr = Counter([r['to'] for r in transactions if r['to']!=address])
+
+        return from_addr, to_addr
+
     def retrieve_transactions(self, address: str) -> Dict[str, Any]:
         """Given an eth address, extract its transaction from etherscan
         """

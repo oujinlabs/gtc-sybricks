@@ -1,4 +1,5 @@
 import requests
+import urllib.request, json
 
 from bs4 import BeautifulSoup
 
@@ -41,3 +42,30 @@ class WalletSpentLessThanXInFeesLego(EtherscanLego):
         fees = sum([float(r['gasUsed']) * float(r['gasPrice']) * 1e-9**2 for r in transactions])
 
         return self.fees_limit <= self.fees_limit
+
+
+class WalletIsVerifiedUniswapTwitter(BaseLego):
+
+    def __init__(self):
+        with urllib.request.urlopen("https://raw.githubusercontent.com/Uniswap/sybil-list/master/verified.json") as url:
+            self.verified_accounts = json.load(url)
+
+    def compute(self, address: str) -> bool:
+        try:
+            self.verified_accounts[address]
+            return True
+        except:
+            return False
+
+
+class WalletGaveCharityUkraine(EtherscanLego):
+
+    def __init__(self, fees_limit: float):
+        super().__init__()
+        self.ukraine_crypto_wallet = '0x165cd37b4c644c2921454429e7f9358d18a45e14'
+    
+    def compute(self, address: str) -> bool:
+        transactions = self.retrieve_transactions(address)
+        _to = self.get_transactions_counterparts(transactions)
+
+        return self.ukraine_crypto_wallet in _to
