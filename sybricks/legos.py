@@ -38,10 +38,14 @@ class WalletSpentLessThanXInFeesLego(EtherscanLego):
         self.fees_limit = fees_limit
 
     def compute(self, address: str) -> bool:
-        transactions = self.retrieve_transactions(address)
-        fees = sum([float(r['gasUsed']) * float(r['gasPrice']) * 1e-9**2 for r in transactions])
+        try:
+            transactions = self.retrieve_transactions(address)
+            fees = sum([float(r['gasUsed']) * float(r['gasPrice']) * 1e-9**2 for r in transactions])
 
-        return self.fees_limit <= self.fees_limit
+            return self.fees_limit <= self.fees_limit
+        except:
+            logger.error('Unable to compute value for WalletSpentLessThanXInFeesLego')
+            return False
 
 
 class WalletIsVerifiedUniswapTwitter(BaseLego):
@@ -60,12 +64,16 @@ class WalletIsVerifiedUniswapTwitter(BaseLego):
 
 class WalletGaveCharityUkraine(EtherscanLego):
 
-    def __init__(self, fees_limit: float):
+    def __init__(self):
         super().__init__()
         self.ukraine_crypto_wallet = '0x165cd37b4c644c2921454429e7f9358d18a45e14'
     
     def compute(self, address: str) -> bool:
-        transactions = self.retrieve_transactions(address)
-        _to = self.get_transactions_counterparts(transactions)
+        try:
+            transactions = self.retrieve_transactions(address)
+            _to = self.get_transactions_counterparts(transactions)
 
-        return self.ukraine_crypto_wallet in _to
+            return self.ukraine_crypto_wallet in _to
+        except:
+            logger.error('Unable to compute value for WalletGaveCharityUkraine')
+            return False
