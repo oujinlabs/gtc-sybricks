@@ -1,21 +1,26 @@
 import requests
 import urllib.request, json
+import logging
 
 from bs4 import BeautifulSoup
 
-from .base import BaseLego
+from .base import BaseLego, EtherscanLego
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class WalletHasEnsLego(BaseLego):
     """Access etherscan's ens lookup page and returns whether the address has an ENS
     """
 
     def __init__(self):
-        self.base_url = f'https://etherscan.io/enslookup-search?search={address}'
+        self.base_url = 'https://etherscan.io/enslookup-search'
 
     def compute(self, address: str) -> bool:
+        logger.info("Computing WalletHasEnsLego signal")
+        url = self.base_url + f'?search={address}'
         try:
-            result = requests.get(self.base_url, headers={'User-Agent': 'Mozilla/6.0'})
+            result = requests.get(url, headers={'User-Agent': 'Mozilla/6.0'})
         except:
             logger.error('Error while accessing the page.')
             return False
@@ -38,13 +43,14 @@ class WalletSpentLessThanXInFeesLego(EtherscanLego):
         self.fees_limit = fees_limit
 
     def compute(self, address: str) -> bool:
+        logger.info("Computing WalletSpentLessThanXInFeesLego signal")
         try:
             transactions = self.retrieve_transactions(address)
             fees = sum([float(r['gasUsed']) * float(r['gasPrice']) * 1e-9**2 for r in transactions])
 
             return self.fees_limit <= self.fees_limit
-        except:
-            logger.error('Unable to compute value for WalletSpentLessThanXInFeesLego')
+        except Exception as e:
+            logger.error(f'Unable to compute value for WalletSpentLessThanXInFeesLego: {e}')
             return False
 
 
@@ -55,6 +61,7 @@ class WalletIsVerifiedUniswapTwitter(BaseLego):
             self.verified_accounts = json.load(url)
 
     def compute(self, address: str) -> bool:
+        logger.info("Computing WalletIsVerifiedUniswapTwitter signal")
         try:
             self.verified_accounts[address]
             return True
@@ -69,11 +76,13 @@ class WalletGaveCharityUkraine(EtherscanLego):
         self.ukraine_crypto_wallet = '0x165cd37b4c644c2921454429e7f9358d18a45e14'
     
     def compute(self, address: str) -> bool:
+        logger.info("Computing WalletGaveCharityUkraine signal")
+
         try:
             transactions = self.retrieve_transactions(address)
-            _to = self.get_transactions_counterparts(transactions)
+            _, _to = self.get_transactions_counterparts(transactions, address)
 
             return self.ukraine_crypto_wallet in _to
-        except:
-            logger.error('Unable to compute value for WalletGaveCharityUkraine')
+        except Exception as e:
+            logger.error(f'Unable to compute value for WalletGaveCharityUkraine: {e}')
             return False

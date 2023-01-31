@@ -5,6 +5,8 @@ Also, it offers a framework for defining those Lego and the user is free to crea
 
 ## Use Existing Legos
 
+Please not that in order to use Legos retrieving data from etherscan, one should have a `.env` file at the root of the project with `ETHERSCAN_API_KEY` set up.
+
 ```{python}
 from sybricks.legos import WalletIsVerifiedUniswapTwitter, WalletGaveCharityUkraine, WalletSpentLessThanXInFeesLego
 from sybricks import LegosComposer
